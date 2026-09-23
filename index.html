@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KrishiMitra — Your field's AI agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F1E3;
+    --paper-dim:#EDE5D2;
+    --ink:#1E2B1E;
+    --forest:#1F3D2B;
+    --leaf:#4F7942;
+    --gold:#C6952F;
+    --soil:#7A5230;
+    --sky:#5E8AA0;
+    --card:#FFFEF9;
+    --line:rgba(30,43,30,0.14);
+    --serif:'Fraunces', Georgia, 'Times New Roman', serif;
+    --sans:'Work Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:16px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{max-width:100%;display:block;}
+  a{color:inherit;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  h1,h2,h3{font-family:var(--serif);font-weight:600;margin:0;color:var(--forest);}
+  p{margin:0;}
+  :focus-visible{outline:2px solid var(--sky);outline-offset:3px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(246,241,227,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:18px 32px;max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:600;font-size:1.25rem;color:var(--forest);}
+  .brand svg{width:30px;height:30px;}
+  .nav-links{display:flex;align-items:center;gap:34px;font-size:0.95rem;}
+  .nav-links a{text-decoration:none;color:var(--ink);position:relative;padding-bottom:3px;}
+  .nav-links a::after{content:"";position:absolute;left:0;bottom:0;width:0;height:1px;background:var(--leaf);transition:width .25s ease;}
+  .nav-links a:hover::after{width:100%;}
+  .nav-cta{
+    background:var(--forest);color:var(--paper);padding:10px 20px;border-radius:3px;
+    text-decoration:none;font-size:0.92rem;font-weight:500;border:1px solid var(--forest);
+    transition:background .2s ease, color .2s ease;
+  }
+  .nav-cta:hover{background:transparent;color:var(--forest);}
+  .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:6px;}
+  .menu-btn span{display:block;width:22px;height:2px;background:var(--forest);margin:5px 0;}
+
+  /* ---------- HERO ---------- */
+  .hero{padding:76px 0 90px;}
+  .hero-grid{display:grid;grid-template-columns:1.05fr 0.95fr;gap:60px;align-items:center;}
+  .eyebrow{font-size:0.92rem;color:var(--soil);margin-bottom:18px;font-style:italic;font-family:var(--serif);}
+  .hero h1{font-size:3.1rem;line-height:1.08;letter-spacing:-0.01em;max-width:11.5ch;}
+  .hero p.lead{margin-top:22px;max-width:44ch;font-size:1.08rem;color:#3A473A;}
+  .hero-actions{display:flex;align-items:center;gap:22px;margin-top:34px;}
+  .btn-primary{
+    background:var(--leaf);color:#fff;padding:14px 26px;border-radius:3px;text-decoration:none;
+    font-weight:500;font-size:0.98rem;border:1px solid var(--leaf);transition:background .2s ease,color .2s ease;
+  }
+  .btn-primary:hover{background:var(--forest);border-color:var(--forest);}
+  .link-quiet{text-decoration:none;font-size:0.95rem;border-bottom:1px solid var(--line);padding-bottom:2px;color:var(--ink);}
+
+  /* hero visual: field rows + chat card */
+  .hero-visual{position:relative;height:460px;}
+  .field-rows{position:absolute;inset:0;border-radius:6px;overflow:hidden;background:var(--forest);}
+  .field-rows svg{width:100%;height:100%;}
+  .chat-card{
+    position:absolute;bottom:-24px;left:-18px;width:340px;max-width:80%;
+    background:var(--card);border:1px solid var(--line);border-radius:4px;
+    box-shadow:0 18px 40px -18px rgba(30,43,30,0.4);padding:20px 20px 18px;
+  }
+  .chat-card .tag{font-size:0.78rem;color:var(--soil);font-style:italic;font-family:var(--serif);margin-bottom:10px;}
+  .bubble{border-radius:3px;padding:10px 13px;font-size:0.88rem;margin-bottom:8px;line-height:1.4;}
+  .bubble.farmer{background:var(--paper-dim);color:var(--ink);}
+  .bubble.ai{background:var(--forest);color:var(--paper);}
+  .bubble.typing::after{content:"▌";animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+  .ask-row{display:flex;gap:8px;margin-top:14px;border-top:1px solid var(--line);padding-top:14px;}
+  .ask-row input{
+    flex:1;border:1px solid var(--line);border-radius:3px;padding:9px 10px;font-family:var(--sans);
+    font-size:0.85rem;background:var(--paper);color:var(--ink);
+  }
+  .ask-row input:focus{border-color:var(--leaf);}
+  .ask-row button{
+    background:var(--gold);border:none;color:var(--forest);border-radius:3px;padding:0 14px;
+    font-weight:600;cursor:pointer;font-size:0.85rem;
+  }
+  .ask-row button:hover{background:#b78324;}
+
+  /* ---------- SECTION HEADS ---------- */
+  .section{padding:88px 0;}
+  .section-head{max-width:52ch;margin-bottom:52px;}
+  .section-head .kicker{font-family:var(--serif);font-style:italic;color:var(--soil);font-size:0.98rem;margin-bottom:10px;}
+  .section-head h2{font-size:2.15rem;line-height:1.15;}
+  .section-head p{margin-top:14px;color:#3A473A;font-size:1.02rem;}
+  .alt-bg{background:var(--paper-dim);}
+
+  /* ---------- FEATURES (field-plot grid) ---------- */
+  .plots{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line);}
+  .plot{
+    border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:34px 30px;
+    background:var(--paper);
+  }
+  .plot:nth-child(even){background:var(--paper-dim);}
+  .plot svg{width:30px;height:30px;stroke:var(--leaf);margin-bottom:18px;}
+  .plot h3{font-size:1.12rem;margin-bottom:8px;font-weight:500;}
+  .plot p{font-size:0.92rem;color:#3F4B3F;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;}
+  .step{padding:0 30px 0 0;position:relative;}
+  .step + .step{border-left:1px solid var(--line);padding-left:30px;}
+  .step .num{font-family:var(--serif);font-size:2.6rem;color:var(--gold);line-height:1;margin-bottom:16px;font-weight:300;}
+  .step h3{font-size:1.15rem;margin-bottom:10px;font-weight:500;}
+  .step p{font-size:0.93rem;color:#3F4B3F;}
+
+  /* ---------- VOICES ---------- */
+  .voices{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;}
+  .voice{
+    background:var(--card);border:1px solid var(--line);padding:28px 26px;border-radius:2px;
+  }
+  .voice:nth-child(2){transform:rotate(-0.4deg);}
+  .voice:nth-child(3){transform:rotate(0.3deg);}
+  .voice q{display:block;font-family:var(--serif);font-style:italic;font-size:1.05rem;line-height:1.5;color:var(--forest);}
+  .voice .who{margin-top:18px;font-size:0.85rem;color:var(--soil);border-top:1px solid var(--line);padding-top:12px;}
+
+  /* ---------- CTA BAND ---------- */
+  .cta-band{background:var(--forest);color:var(--paper);padding:80px 0;text-align:left;}
+  .cta-band .wrap{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;}
+  .cta-band h2{color:var(--paper);font-size:2rem;max-width:16ch;}
+  .cta-band p{color:#CFE0CE;margin-top:12px;max-width:38ch;}
+  .cta-band .btn-primary{background:var(--gold);border-color:var(--gold);color:var(--forest);}
+  .cta-band .btn-primary:hover{background:#b78324;border-color:#b78324;color:var(--paper);}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:#16241A;color:#AFC2AC;padding:56px 0 30px;font-size:0.88rem;}
+  .foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:30px;padding-bottom:36px;border-bottom:1px solid rgba(255,255,255,0.1);}
+  .foot-grid h4{color:var(--paper);font-family:var(--sans);font-weight:600;font-size:0.9rem;margin-bottom:14px;}
+  .foot-grid a{display:block;text-decoration:none;color:#AFC2AC;margin-bottom:9px;}
+  .foot-grid a:hover{color:var(--gold);}
+  .foot-brand{font-family:var(--serif);color:var(--paper);font-size:1.15rem;margin-bottom:10px;}
+  .foot-bottom{padding-top:22px;display:flex;justify-content:space-between;color:#7E9179;}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-visual{height:380px;margin-top:20px;}
+    .plots,.steps,.voices{grid-template-columns:1fr;}
+    .step + .step{border-left:none;border-top:1px solid var(--line);padding-left:0;padding-top:26px;margin-top:26px;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .nav-links{display:none;}
+    .menu-btn{display:block;}
+    .hero h1{font-size:2.3rem;}
+  }
+  @media (max-width:560px){
+    .wrap{padding:0 20px;}
+    .foot-grid{grid-template-columns:1fr;}
+    .cta-band .wrap{flex-direction:column;align-items:flex-start;}
+    .chat-card{position:static;width:100%;margin-top:16px;}
+    .hero-visual{height:auto;}
+    .field-rows{position:static;height:200px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--leaf)" stroke-width="1.6"><path d="M12 21c0-6 4-9 8-10-1 6-3 10-8 10Z"/><path d="M12 21c0-7-4-11-9-12 1 7 4 12 9 12Z"/><path d="M12 21V9"/></svg>
+      KrishiMitra
+    </div>
+    <nav class="nav-links">
+      <a href="#capabilities">Capabilities</a>
+      <a href="#how">How it works</a>
+      <a href="#voices">Voices from the field</a>
+    </nav>
+    <a class="nav-cta" href="#try">Talk to KrishiMitra</a>
+    <button class="menu-btn" id="menuBtn" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">An AI agent that works the way your field does</div>
+      <h1>Farming decisions, answered before sunrise.</h1>
+      <p class="lead">KrishiMitra listens in Hindi, Marathi or English — over a phone call, WhatsApp voice note, or text — and turns weather, mandi prices and your own field's history into one clear next step.</p>
+      <div class="hero-actions">
+        <a class="btn-primary" href="#try">Ask KrishiMitra now</a>
+        <a class="link-quiet" href="#how">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-visual" id="try">
+      <div class="field-rows">
+        <svg viewBox="0 0 400 460" preserveAspectRatio="xMidYMid slice">
+          <rect width="400" height="460" fill="#1F3D2B"/>
+          <g stroke="#4F7942" stroke-width="14" opacity="0.55">
+            <line x1="-20" y1="40" x2="420" y2="10"/>
+            <line x1="-20" y1="90" x2="420" y2="60"/>
+            <line x1="-20" y1="140" x2="420" y2="110"/>
+            <line x1="-20" y1="190" x2="420" y2="160"/>
+            <line x1="-20" y1="240" x2="420" y2="210"/>
+            <line x1="-20" y1="290" x2="420" y2="260"/>
+            <line x1="-20" y1="340" x2="420" y2="310"/>
+            <line x1="-20" y1="390" x2="420" y2="360"/>
+          </g>
+          <g fill="#C6952F" opacity="0.85">
+            <circle cx="70" cy="70" r="3"/><circle cx="130" cy="65" r="3"/><circle cx="190" cy="60" r="3"/>
+            <circle cx="250" cy="55" r="3"/><circle cx="310" cy="50" r="3"/>
+            <circle cx="60" cy="170" r="3"/><circle cx="120" cy="165" r="3"/><circle cx="180" cy="160" r="3"/>
+            <circle cx="240" cy="155" r="3"/><circle cx="300" cy="150" r="3"/>
+          </g>
+        </svg>
+      </div>
+      <div class="chat-card">
+        <div class="tag">A real kind of question</div>
+        <div id="chatLog"></div>
+        <form class="ask-row" id="askForm">
+          <input id="askInput" type="text" placeholder="Type a question, e.g. 'wheat price today'" autocomplete="off">
+          <button type="submit">Ask</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="capabilities">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">What it actually does</div>
+      <h2>Six jobs, one conversation.</h2>
+      <p>No dashboards to learn. KrishiMitra fits into how a farm already talks — a phone call, a photo, a voice note — and answers in kind.</p>
+    </div>
+  </div>
+  <div class="plots">
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="8"/><path d="M9 12l2 2 4-4"/></svg>
+      <h3>Crop doctor</h3>
+      <p>Send a photo of a sick leaf. Get the disease or pest named, and the treatment window that actually matters.</p>
+    </div>
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 19h16M6 19V9l4-4 4 4v10M6 13h8"/></svg>
+      <h3>Mandi prices</h3>
+      <p>Live rates from nearby markets, with a plain sell-or-hold call — not just a number to interpret yourself.</p>
+    </div>
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M6 15a4 4 0 010-8 5 5 0 019.6-1.5A4.5 4.5 0 0118 15H6z"/></svg>
+      <h3>Weather &amp; irrigation</h3>
+      <p>Forecasts tied to your field's coordinates, so spraying and watering are timed to what's actually coming.</p>
+    </div>
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M4 6h16v12H4zM4 10h16M9 6v12"/></svg>
+      <h3>Scheme navigator</h3>
+      <p>Matches you to subsidies and schemes you already qualify for, and fills the paperwork for you to check.</p>
+    </div>
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M12 3a3 3 0 013 3v6a3 3 0 01-6 0V6a3 3 0 013-3zM6 12a6 6 0 0012 0M12 18v3"/></svg>
+      <h3>Voice-first</h3>
+      <p>Works over a normal phone call in your own language. Typing is optional, never required.</p>
+    </div>
+    <div class="plot">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6"><path d="M3 20l4-9 4 5 3-6 7 10H3z"/></svg>
+      <h3>Soil &amp; sowing plan</h3>
+      <p>Rotation and sowing windows built from your soil test and last three seasons of yield, not a generic almanac.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section alt-bg" id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Three steps</div>
+      <h2>How it works</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="num">1</div>
+        <h3>Ask, any way you like</h3>
+        <p>Call, send a WhatsApp voice note, or type — in Hindi, Marathi, Punjabi or English.</p>
+      </div>
+      <div class="step">
+        <div class="num">2</div>
+        <h3>KrishiMitra reads your field</h3>
+        <p>It combines satellite data, hyperlocal weather, mandi feeds and your farm's own past seasons.</p>
+      </div>
+      <div class="step">
+        <div class="num">3</div>
+        <h3>You get a plan, not a paragraph</h3>
+        <p>One clear action, timed to your field's real conditions — sent back the same way you asked.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="voices">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Voices from the field</div>
+      <h2>What farmers are telling us</h2>
+    </div>
+    <div class="voices">
+      <div class="voice">
+        <q>KrishiMitra caught pink bollworm in my cotton ten days before I would have noticed. That's an entire spray cycle saved.</q>
+        <div class="who">Rajendra Patil — cotton grower, Yavatmal</div>
+      </div>
+      <div class="voice">
+        <q>I used to sell wheat the same week every year out of habit. Now I wait three more days when the price alert tells me to.</q>
+        <div class="who">Sunita Devi — wheat &amp; mustard, Sitapur</div>
+      </div>
+      <div class="voice">
+        <q>My father can't read, but he can make a phone call. That's the only reason this reaches him at all.</q>
+        <div class="who">Manjeet Singh — rice grower, Ludhiana</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <div>
+      <h2>Your next season starts with one call.</h2>
+      <p>No app to install. No form to fill first. KrishiMitra answers the way your field already talks to you.</p>
+    </div>
+    <a class="btn-primary" href="#try">Ask KrishiMitra now</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand">KrishiMitra</div>
+        <p style="max-width:32ch;color:#8FA48B;">An AI agent for the Indian farmer — built around the phone call, not the screen.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#how">How it works</a>
+        <a href="#voices">Voices from the field</a>
+      </div>
+      <div>
+        <h4>Support</h4>
+        <a href="#">Talk to our team</a>
+        <a href="#">Available languages</a>
+        <a href="#">For cooperatives</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Careers</a>
+        <a href="#">Trust &amp; data</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 KrishiMitra</span>
+      <span>Made for the field, not the office</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // mobile menu toggle
+  const menuBtn = document.getElementById('menuBtn');
+  const navLinks = document.querySelector('.nav-links');
+  menuBtn.addEventListener('click', function(){
+    const open = navLinks.style.display === 'flex';
+    navLinks.style.display = open ? 'none' : 'flex';
+    navLinks.style.flexDirection = 'column';
+    navLinks.style.position = 'absolute';
+    navLinks.style.top = '64px';
+    navLinks.style.right = '32px';
+    navLinks.style.background = 'var(--paper)';
+    navLinks.style.border = '1px solid var(--line)';
+    navLinks.style.padding = '16px 20px';
+    navLinks.style.gap = '14px';
+  });
+
+  // chat demo: typed conversation + simple keyword-matched replies
+  const chatLog = document.getElementById('chatLog');
+  const askForm = document.getElementById('askForm');
+  const askInput = document.getElementById('askInput');
+
+  const script = [
+    ["Mere tamatar ke patton par peele dhabbe hain.", "That's early blight. Spray a copper-based fungicide within 48 hours — rain is due Thursday, so go before then."],
+    ["Nashik mandi mein wheat ka bhav kya hai aaj?", "₹2,340/quintal today at Nashik, up ₹40 since Monday. Holding two more days looks worth it."],
+    ["PM-KISAN ki kist abhi tak nahi aayi.", "Your last installment is stuck on a pending verification. I've filled the correction form — just review and send."]
+  ];
+
+  function addBubble(text, cls, cb){
+    const div = document.createElement('div');
+    div.className = 'bubble ' + cls;
+    chatLog.appendChild(div);
+    let i = 0;
+    div.classList.add('typing');
+    const iv = setInterval(function(){
+      div.textContent = text.slice(0, i++);
+      if(i > text.length){
+        clearInterval(iv);
+        div.classList.remove('typing');
+        if(cb) cb();
+      }
+    }, 16);
+  }
+
+  function trim(){
+    while(chatLog.children.length > 4){
+      chatLog.removeChild(chatLog.firstChild);
+    }
+  }
+
+  let step = 0, running = false;
+  function playNext(){
+    if(running) return;
+    running = true;
+    const [q, a] = script[step % script.length];
+    trim();
+    addBubble(q, 'farmer', function(){
+      setTimeout(function(){
+        addBubble(a, 'ai', function(){
+          running = false;
+        });
+        trim();
+      }, 350);
+    });
+    step++;
+  }
+
+  playNext();
+  const auto = setInterval(function(){
+    if(!running) playNext();
+  }, 5200);
+
+  function reply(q){
+    const lower = q.toLowerCase();
+    if(/price|bhav|mandi|rate/.test(lower)) return "Today's nearest mandi rate is ₹2,340/quintal, trending up — I'd hold two days.";
+    if(/pest|disease|patt|spot|dhabb|leaf/.test(lower)) return "Send a photo if you can — from your words this sounds like early blight. Copper fungicide within 48 hours.";
+    if(/weather|rain|barish|mausam/.test(lower)) return "Light rain expected in two days. Finish any spraying before then.";
+    if(/scheme|yojana|pm-kisan|subsidy/.test(lower)) return "I can check your eligibility for three current schemes — say 'check schemes' and I'll pull your record.";
+    return "Got it — I'm cross-checking that against your field's data now. A full agent would reply in seconds over call or WhatsApp.";
+  }
+
+  askForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    const val = askInput.value.trim();
+    if(!val) return;
+    clearInterval(auto);
+    running = false;
+    trim();
+    addBubble(val, 'farmer', function(){
+      setTimeout(function(){
+        addBubble(reply(val), 'ai');
+      }, 300);
+    });
+    askInput.value = '';
+  });
+})();
+
+
+window.wxOConfiguration = {
+    orchestrationID: "0087c08433114eae9924a560f1297d20_f2de1c72-0f0c-4743-994c-bd479ef6c5c8",
+    hostURL: "https://au-syd.watson-orchestrate.cloud.ibm.com",
+    rootElementID: "root",
+    deploymentPlatform: "ibmcloud",
+    crn: "crn:v1:bluemix:public:watsonx-orchestrate:au-syd:a/0087c08433114eae9924a560f1297d20:f2de1c72-0f0c-4743-994c-bd479ef6c5c8::",
+    chatOptions: {
+        agentId: "036cc646-f849-47bd-939f-a2783c49b773", 
+    }
+  };
+  setTimeout(function () {
+    const script = document.createElement('script');
+    script.src = `${window.wxOConfiguration.hostURL}/wxochat/wxoLoader.js?embed=true`;
+    script.addEventListener('load', function () {
+        wxoLoader.init();
+    });
+    document.head.appendChild(script);
+  }, 0);   
+</script>
+</body>
+</html>
